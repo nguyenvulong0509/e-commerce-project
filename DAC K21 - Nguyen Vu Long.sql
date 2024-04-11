@@ -11,7 +11,7 @@ FROM `bigquery-public-data.google_analytics_sample.ga_sessions_2017*`
 WHERE _table_suffix BETWEEN '0101' AND '0331'
 GROUP BY month
 ORDER BY month;
---correct
+
 
 -- Q2
 /* - Based the prolem, we first need to calculate the total visits and total bounces by using SUM() on total.visits and total.bounces
@@ -26,7 +26,7 @@ FROM `bigquery-public-data.google_analytics_sample.ga_sessions_201707*`
 GROUP BY trafficSource.source 
 HAVING SUM(totals.bounces) IS NOT NULL 
 ORDER BY total_visits DESC;
---correct
+
 
 -- Q3
 /* - First, UNNEST hits and product to access productRevenue. Then, choose fields as required (date data is process as above)
@@ -57,7 +57,7 @@ UNION ALL
       GROUP BY FORMAT_DATE('%Y%m',PARSE_DATE('%Y%m%d',date)) 
             ,trafficSource.source) 
 ORDER BY Prd_Revenue DESC;
---correct
+
 
 -- Q4
 /* -  Calculate number of pageviews by purchase type seperately by creating 2 tables
@@ -94,10 +94,7 @@ LEFT JOIN (
             GROUP BY  FORMAT_DATE('%Y%m',PARSE_DATE('%Y%m%d',date))) AS p2 
 ON p1.time = p2.time;
 
---cũng đc, nhưng cách ghi này nó sẽ ok khi e đang đi làm rồi
---câu 4 này lưu ý là mình nên dùng left join hoặc full join, bởi vì trong câu này, phạm vi chỉ từ tháng 6-7, nên chắc chắc sẽ có pur và nonpur của cả 2 tháng
---mình inner join thì vô tình nó sẽ ra đúng. nhưng nếu đề bài là 1 khoảng thời gian dài hơn, 2-3 năm chẳng hạn, nó cũng tháng chỉ có nonpur mà k có pur
---thì khi đó inner join nó sẽ làm mình bị mất data, thay vì hiện số của nonpur và pur thì nó để trống
+
 
 -- Q5
 /* -  Adjust the dataset to limit the period to only July. UNNEST the hits and product to access productRevenue
@@ -112,8 +109,7 @@ FROM `bigquery-public-data.google_analytics_sample.ga_sessions_201707*`,
       UNNEST (hits.product) product 
 WHERE totals.transactions >=1 
       AND product.productRevenue IS NOT NULL 
-GROUP BY 1 --FORMAT_DATE('%Y%m',PARSE_DATE('%Y%m%d',date))
-;
+GROUP BY 1 --FORMAT_DATE('%Y%m',PARSE_DATE('%Y%m%d',date));
 
 
 -- Q6 (result = xx.86 ¬ sample result = xx.85 - bit different)
@@ -129,8 +125,7 @@ FROM `bigquery-public-data.google_analytics_sample.ga_sessions_201707*`,
       UNNEST (hits.product) product 
 WHERE totals.transactions IS NOT NULL 
       AND product.productRevenue IS NOT NULL 
-GROUP BY 1 --FORMAT_DATE('%Y%m',PARSE_DATE('%Y%m%d',date))
-;
+GROUP BY 1 --FORMAT_DATE('%Y%m',PARSE_DATE('%Y%m%d',date));
 
 
 -- Q7
@@ -157,7 +152,7 @@ WHERE fullVisitorId IN (
       AND totals.transactions >=1 
 GROUP BY product.v2ProductName 
 ORDER BY Quantity DESC;
---correct
+
 
 -- Q8
 /* -  We will write 3 CTEs and join them to solve the problem. UNNEST the hits to access the action_type (In the 3rd CTE, it's essential to UNNEST the product to access the productRevenue since we need the condition to filter the purchase type)
@@ -206,10 +201,9 @@ LEFT JOIN p3
       USING (month) 
 ORDER BY p1.month;
 
---bài yêu cầu tính số sản phầm, mình nên count productName hay productSKU thì sẽ hợp lý hơn là count action_type
---k nên xài inner join, nếu table1 có 10 record,table2 có 5 record,table3 có 1 record, thì sau khi inner join, output chỉ ra 1 record
 
---Cách 1:dùng CTE
+
+--Different solution 1
 with
 product_view as(
 SELECT
@@ -261,7 +255,7 @@ order by pv.month;
 
 --bài này k nên inner join, vì nếu như bảng purchase k có data thì sẽ k mapping đc vs bảng productview, từ đó kết quả sẽ k có luôn, mình nên dùng left join
 
---Cách 2: bài này mình có thể dùng count(case when) hoặc sum(case when)
+--Different solution 2
 
 with product_data as(
 select
@@ -286,4 +280,4 @@ from product_data;
 
 
 
-                                                      --very good---
+                                                     
